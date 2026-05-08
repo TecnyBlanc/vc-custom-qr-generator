@@ -1,537 +1,335 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RCUSTOM QR Generator</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
-        background: #f5f5f5;
-        color: #111;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        padding: 16px;
-      }
-      .wrap {
-        width: 100%;
-        max-width: 420px;
-      }
-      h1 {
-        font-size: 24px;
-        font-weight: 600;
-        text-align: center;
-        letter-spacing: 3px;
-        margin: 16px 0 14px;
-        color: #111;
-      }
-      .qr-box {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 16px;
-        background: #fff;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        padding: 12px;
-        width: fit-content;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      #qr-img {
-        display: block;
-        width: 180px;
-        height: 180px;
-      }
-      .dims {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 14px;
-      }
-      .dim-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .dim-label {
-        font-size: 13px;
-        color: #666;
-        width: 14px;
-        flex-shrink: 0;
-        font-weight: 500;
-      }
-      .dim-val {
-        font-size: 13px;
-        font-weight: 600;
-        color: #111;
-        width: 44px;
-        text-align: right;
-        flex-shrink: 0;
-      }
-      .slider-wrap {
-        flex: 1;
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RCUSTOM QR Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #f5f5f5;
+    color: #111;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+  }
+  .wrap { width: 100%; max-width: 420px; }
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 3px;
+    margin: 16px 0 14px;
+    color: #111;
+  }
+  .qr-box {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  #qr-canvas {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+  }
+  .dims { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+  .dim-row { display: flex; align-items: center; gap: 8px; }
+  .dim-label {
+    font-size: 13px;
+    color: #666;
+    width: 14px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .dim-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+    width: 44px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .slider-wrap { flex: 1; }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: #ddd;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #111;
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #111;
+    border: none;
+    cursor: pointer;
+  }
+  .scale-btns { display: flex; gap: 4px; flex-shrink: 0; }
+  .scale-btn {
+    font-size: 11px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #f0f0f0;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .scale-btn.active {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+  }
+  .bottom-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .save-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #111;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .save-btn:hover { background: #f5f5f5; }
+  #save-tick {
+    opacity: 0;
+    font-size: 12px;
+    color: #2a9d5c;
+    transition: opacity 0.3s;
+  }
+  .saved-section { margin-top: 4px; }
+  .saved-title {
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .saved-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .saved-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .saved-card:hover { border-color: #bbb; }
+  .dims-text { flex: 1; font-size: 12px; color: #666; }
+  .dims-text strong {
+    color: #111;
+    font-weight: 600;
+    font-size: 13px;
+    display: block;
+  }
+  .del-btn {
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+    background: transparent;
+    color: #aaa;
+    cursor: pointer;
+  }
+  .del-btn:hover { color: #e33; border-color: #e33; }
+  .empty-msg { font-size: 12px; color: #bbb; padding: 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RCUSTOM</h1>
+  <div class="qr-box"><canvas id="qr-canvas" width="180" height="180"></canvas></div>
+  <div class="dims" id="dims-ui"></div>
+  <div class="bottom-row">
+    <button class="save-btn" onclick="saveCard()">💾 Save carton</button>
+    <span id="save-tick">Saved ✓</span>
+  </div>
+  <div class="saved-section">
+    <div class="saved-title">Saved cartons</div>
+    <div class="saved-list" id="saved-list"></div>
+  </div>
+</div>
 
-      input[type="range"] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 4px;
-        border-radius: 2px;
-        background: #ddd;
-        outline: none;
-        cursor: pointer;
-        padding: 0;
-        margin: 8px 0;
-      }
-      input[type="range"]::-webkit-slider-runnable-track {
-        height: 4px;
-        border-radius: 2px;
-        background: #ddd;
-      }
-      input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: #111;
-        cursor: pointer;
-        margin-top: -9px;
-      }
-      input[type="range"]::-moz-range-track {
-        height: 4px;
-        border-radius: 2px;
-        background: #ddd;
-      }
-      input[type="range"]::-moz-range-thumb {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: #111;
-        border: none;
-        cursor: pointer;
-      }
-      input[type="range"]::-ms-track {
-        height: 4px;
-        background: #ddd;
-        border-color: transparent;
-        color: transparent;
-      }
-      input[type="range"]::-ms-thumb {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: #111;
-        border: none;
-      }
+<script>
+const STORE_STATE = 'rcustom_state';
+const STORE_SAVED = 'rcustom_saved';
 
-      .scale-btns {
-        display: flex;
-        gap: 4px;
-        flex-shrink: 0;
-      }
-      .scale-btn {
-        font-size: 11px;
-        padding: 4px 7px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        background: #f0f0f0;
-        color: #555;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .scale-btn.active {
-        background: #111;
-        color: #fff;
-        border-color: #111;
-      }
-      .bottom-row {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 14px;
-      }
-      .save-btn {
-        flex: 1;
-        padding: 11px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        background: #fff;
-        color: #111;
-        font-size: 14px;
-        cursor: pointer;
-        font-weight: 500;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .save-btn:active {
-        background: #f0f0f0;
-      }
-      #save-tick {
-        opacity: 0;
-        font-size: 12px;
-        color: #2a9d5c;
-        transition: opacity 0.3s;
-        white-space: nowrap;
-      }
-      .saved-section {
-        margin-top: 4px;
-      }
-      .saved-title {
-        font-size: 11px;
-        color: #999;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-      .saved-list {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        max-height: 240px;
-        overflow-y: auto;
-      }
-      .saved-card {
-        background: #fff;
-        border: 1px solid #e5e5e5;
-        border-radius: 8px;
-        padding: 8px 10px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .saved-card:active {
-        background: #f5f5f5;
-      }
-      .dims-text {
-        flex: 1;
-        font-size: 12px;
-        color: #666;
-      }
-      .dims-text strong {
-        color: #111;
-        font-weight: 600;
-        font-size: 13px;
-        display: block;
-      }
-      .del-btn {
-        font-size: 14px;
-        padding: 2px 8px;
-        border-radius: 6px;
-        border: 1px solid #e5e5e5;
-        background: transparent;
-        color: #aaa;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .del-btn:active {
-        color: #e33;
-        border-color: #e33;
-      }
-      .empty-msg {
-        font-size: 12px;
-        color: #bbb;
-        padding: 6px 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <h1>RCUSTOM</h1>
-      <div class="qr-box">
-        <img id="qr-img" src="" alt="QR Code" width="180" height="180" />
-      </div>
-      <div class="dims" id="dims-ui"></div>
-      <div class="bottom-row">
-        <button class="save-btn" onclick="saveCard()">
-          &#128190; Save carton
-        </button>
-        <span id="save-tick">Saved &#10003;</span>
-      </div>
-      <div class="saved-section">
-        <div class="saved-title">Saved cartons</div>
-        <div class="saved-list" id="saved-list"></div>
-      </div>
-    </div>
+const DIMS = [
+  { key: 'L', label: 'L', defaultScale: 6, scaleOptions: [4,5,6,7], defaultVal: 60 },
+  { key: 'W', label: 'W', defaultScale: 4, scaleOptions: [2,3,4,5], defaultVal: 40 },
+  { key: 'H', label: 'H', defaultScale: 3, scaleOptions: [2,3,4,5], defaultVal: 30 }
+];
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-      var STORE_STATE = "rcustom_state";
-      var STORE_SAVED = "rcustom_saved";
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORE_STATE);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return { L: 60, W: 40, H: 30, scales: { L: 6, W: 4, H: 3 } };
+}
 
-      var DIMS = [
-        {
-          key: "L",
-          label: "L",
-          defaultScale: 6,
-          scaleOptions: [4, 5, 6, 7],
-          defaultVal: 60,
-        },
-        {
-          key: "W",
-          label: "W",
-          defaultScale: 4,
-          scaleOptions: [2, 3, 4, 5],
-          defaultVal: 40,
-        },
-        {
-          key: "H",
-          label: "H",
-          defaultScale: 3,
-          scaleOptions: [2, 3, 4, 5],
-          defaultVal: 30,
-        },
-      ];
+function loadSaved() {
+  try {
+    const s = localStorage.getItem(STORE_SAVED);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return [];
+}
 
-      function loadState() {
-        try {
-          var s = localStorage.getItem(STORE_STATE);
-          if (s) return JSON.parse(s);
-        } catch (e) {}
-        return { L: 60, W: 40, H: 30, scales: { L: 6, W: 4, H: 3 } };
-      }
-      function loadSaved() {
-        try {
-          var s = localStorage.getItem(STORE_SAVED);
-          if (s) return JSON.parse(s);
-        } catch (e) {}
-        return [];
-      }
-      function persistState() {
-        try {
-          localStorage.setItem(
-            STORE_STATE,
-            JSON.stringify({
-              L: state.L,
-              W: state.W,
-              H: state.H,
-              scales: state.scales,
-            }),
-          );
-        } catch (e) {}
-      }
-      function persistSaved() {
-        try {
-          localStorage.setItem(STORE_SAVED, JSON.stringify(state.saved));
-        } catch (e) {}
-      }
+function persistState() {
+  try { localStorage.setItem(STORE_STATE, JSON.stringify({ L: state.L, W: state.W, H: state.H, scales: state.scales })); } catch(e) {}
+}
 
-      var _s = loadState();
-      var state = {
-        L: _s.L,
-        W: _s.W,
-        H: _s.H,
-        scales: _s.scales,
-        saved: loadSaved(),
-      };
+function persistSaved() {
+  try { localStorage.setItem(STORE_SAVED, JSON.stringify(state.saved)); } catch(e) {}
+}
 
-      function scaleMin(s) {
-        return s * 10;
-      }
-      function scaleMax(s) {
-        return s * 10 + 9;
-      }
+const _s = loadState();
+const state = { L: _s.L, W: _s.W, H: _s.H, scales: _s.scales, saved: loadSaved() };
 
-      function buildUI() {
-        var ui = document.getElementById("dims-ui");
-        ui.innerHTML = "";
-        DIMS.forEach(function (d) {
-          var min = scaleMin(state.scales[d.key]);
-          var max = scaleMax(state.scales[d.key]);
-          state[d.key] = Math.min(Math.max(state[d.key], min), max);
+function scaleMin(s) { return s * 10; }
+function scaleMax(s) { return s * 10 + 9; }
 
-          var row = document.createElement("div");
-          row.className = "dim-row";
+function buildUI() {
+  const ui = document.getElementById('dims-ui');
+  ui.innerHTML = '';
+  DIMS.forEach(d => {
+    const min = scaleMin(state.scales[d.key]);
+    const max = scaleMax(state.scales[d.key]);
+    state[d.key] = Math.min(Math.max(state[d.key], min), max);
 
-          var lbl = document.createElement("span");
-          lbl.className = "dim-label";
-          lbl.textContent = d.label;
-          row.appendChild(lbl);
+    const row = document.createElement('div');
+    row.className = 'dim-row';
 
-          var sw = document.createElement("div");
-          sw.className = "slider-wrap";
-          var sl = document.createElement("input");
-          sl.type = "range";
-          sl.min = min;
-          sl.max = max;
-          sl.step = 1;
-          sl.value = state[d.key];
-          sl.id = "sl_" + d.key;
-          sl.oninput = (function (key) {
-            return function () {
-              state[key] = parseInt(this.value);
-              updateVal(key);
-              updateQR();
-              persistState();
-            };
-          })(d.key);
-          sw.appendChild(sl);
-          row.appendChild(sw);
+    const lbl = document.createElement('span');
+    lbl.className = 'dim-label';
+    lbl.textContent = d.label;
+    row.appendChild(lbl);
 
-          var dv = document.createElement("span");
-          dv.className = "dim-val";
-          dv.id = "dv_" + d.key;
-          dv.textContent = state[d.key] + " cm";
-          row.appendChild(dv);
+    const sw = document.createElement('div');
+    sw.className = 'slider-wrap';
+    const sl = document.createElement('input');
+    sl.type = 'range'; sl.min = min; sl.max = max; sl.step = 1; sl.value = state[d.key]; sl.id = 'sl_' + d.key;
+    sl.oninput = () => { state[d.key] = parseInt(sl.value); updateVal(d.key); updateQR(); persistState(); };
+    sw.appendChild(sl);
+    row.appendChild(sw);
 
-          var btns = document.createElement("div");
-          btns.className = "scale-btns";
-          d.scaleOptions.forEach(function (n) {
-            var b = document.createElement("button");
-            b.className =
-              "scale-btn" + (state.scales[d.key] === n ? " active" : "");
-            b.textContent = n;
-            b.onclick = (function (key, val) {
-              return function () {
-                state.scales[key] = val;
-                persistState();
-                buildUI();
-                updateQR();
-              };
-            })(d.key, n);
-            btns.appendChild(b);
-          });
-          row.appendChild(btns);
-          ui.appendChild(row);
-        });
-      }
+    const dv = document.createElement('span');
+    dv.className = 'dim-val'; dv.id = 'dv_' + d.key;
+    dv.textContent = state[d.key] + ' cm';
+    row.appendChild(dv);
 
-      function updateVal(key) {
-        var el = document.getElementById("dv_" + key);
-        if (el) el.textContent = state[key] + " cm";
-      }
+    const btns = document.createElement('div');
+    btns.className = 'scale-btns';
+    d.scaleOptions.forEach(n => {
+      const b = document.createElement('button');
+      b.className = 'scale-btn' + (state.scales[d.key] === n ? ' active' : '');
+      b.textContent = n;
+      b.onclick = () => { state.scales[d.key] = n; persistState(); buildUI(); updateQR(); };
+      btns.appendChild(b);
+    });
+    row.appendChild(btns);
+    ui.appendChild(row);
+  });
+}
 
-      /* Use a hidden div + grab the data: img src — avoids canvas taint on Android & Safari */
-      var _qrDiv = null;
-      function updateQR() {
-        var tab = "\t";
-        var payload =
-          "RCUSTOM" +
-          tab +
-          (state.L / 100).toFixed(2) +
-          tab +
-          (state.W / 100).toFixed(2) +
-          tab +
-          (state.H / 100).toFixed(2);
+function updateVal(key) {
+  const el = document.getElementById('dv_' + key);
+  if (el) el.textContent = state[key] + ' cm';
+}
 
-        if (!_qrDiv) {
-          _qrDiv = document.createElement("div");
-          _qrDiv.style.cssText =
-            "position:absolute;left:-9999px;top:-9999px;visibility:hidden;";
-          document.body.appendChild(_qrDiv);
-        } else {
-          _qrDiv.innerHTML = "";
-        }
+function updateQR() {
+  const tab = '\t';
+  const payload = 'RCUSTOM' + tab + (state.L / 100).toFixed(2) + tab + (state.W / 100).toFixed(2) + tab + (state.H / 100).toFixed(2);
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 180, 180);
+  try {
+    const div = document.createElement('div');
+    new QRCode(div, { text: payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+    setTimeout(() => {
+      const img = div.querySelector('img') || div.querySelector('canvas');
+      if (img && img.tagName === 'CANVAS') { ctx.drawImage(img, 0, 0, 180, 180); }
+      else if (img) { const i = new Image(); i.onload = () => ctx.drawImage(i, 0, 0, 180, 180); i.src = img.src; }
+    }, 50);
+  } catch(e) {}
+}
 
-        try {
-          new QRCode(_qrDiv, {
-            text: payload,
-            width: 180,
-            height: 180,
-            correctLevel: QRCode.CorrectLevel.M,
-          });
-        } catch (e) {
-          return;
-        }
+function saveCard() {
+  state.saved.unshift({ L: state.L, W: state.W, H: state.H });
+  persistSaved();
+  renderSaved();
+  const tick = document.getElementById('save-tick');
+  tick.style.opacity = 1;
+  setTimeout(() => tick.style.opacity = 0, 1800);
+}
 
-        /* Poll for the img data: src — QRCode.js may render async */
-        var attempts = 0;
-        var timer = setInterval(function () {
-          var img = _qrDiv.querySelector("img");
-          if (img && img.src && img.src.indexOf("data:") === 0) {
-            document.getElementById("qr-img").src = img.src;
-            clearInterval(timer);
-          } else if (++attempts > 20) {
-            clearInterval(timer);
-          }
-        }, 30);
-      }
+function loadCard(entry) {
+  state.L = entry.L; state.W = entry.W; state.H = entry.H;
+  state.scales.L = Math.floor(entry.L / 10);
+  state.scales.W = Math.floor(entry.W / 10);
+  state.scales.H = Math.floor(entry.H / 10);
+  persistState();
+  buildUI(); updateQR();
+}
 
-      function saveCard() {
-        state.saved.unshift({ L: state.L, W: state.W, H: state.H });
-        persistSaved();
-        renderSaved();
-        var tick = document.getElementById("save-tick");
-        tick.style.opacity = 1;
-        setTimeout(function () {
-          tick.style.opacity = 0;
-        }, 1800);
-      }
+function renderSaved() {
+  const list = document.getElementById('saved-list');
+  if (!state.saved.length) {
+    list.innerHTML = '<div class="empty-msg">No saved cartons yet.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.saved.forEach((e, i) => {
+    const card = document.createElement('div');
+    card.className = 'saved-card';
+    card.onclick = (ev) => { if (!ev.target.classList.contains('del-btn')) loadCard(e); };
 
-      function loadCard(entry) {
-        state.L = entry.L;
-        state.W = entry.W;
-        state.H = entry.H;
-        state.scales.L = Math.floor(entry.L / 10);
-        state.scales.W = Math.floor(entry.W / 10);
-        state.scales.H = Math.floor(entry.H / 10);
-        persistState();
-        buildUI();
-        updateQR();
-      }
+    const info = document.createElement('div');
+    info.className = 'dims-text';
+    info.innerHTML = '<strong>' + e.L + ' × ' + e.W + ' × ' + e.H + ' cm</strong>' +
+      (e.L/100).toFixed(2) + ' × ' + (e.W/100).toFixed(2) + ' × ' + (e.H/100).toFixed(2) + ' m';
+    card.appendChild(info);
 
-      function renderSaved() {
-        var list = document.getElementById("saved-list");
-        if (!state.saved.length) {
-          list.innerHTML = '<div class="empty-msg">No saved cartons yet.</div>';
-          return;
-        }
-        list.innerHTML = "";
-        state.saved.forEach(function (e, i) {
-          var card = document.createElement("div");
-          card.className = "saved-card";
-          card.onclick = function (ev) {
-            if (!ev.target.classList.contains("del-btn")) loadCard(e);
-          };
+    const del = document.createElement('button');
+    del.className = 'del-btn'; del.textContent = '×';
+    del.onclick = () => { state.saved.splice(i, 1); persistSaved(); renderSaved(); };
+    card.appendChild(del);
 
-          var info = document.createElement("div");
-          info.className = "dims-text";
-          info.innerHTML =
-            "<strong>" +
-            e.L +
-            " &times; " +
-            e.W +
-            " &times; " +
-            e.H +
-            " cm</strong>" +
-            (e.L / 100).toFixed(2) +
-            " &times; " +
-            (e.W / 100).toFixed(2) +
-            " &times; " +
-            (e.H / 100).toFixed(2) +
-            " m";
-          card.appendChild(info);
+    list.appendChild(card);
+  });
+}
 
-          var del = document.createElement("button");
-          del.className = "del-btn";
-          del.textContent = "\u00d7";
-          del.onclick = (function (idx) {
-            return function () {
-              state.saved.splice(idx, 1);
-              persistSaved();
-              renderSaved();
-            };
-          })(i);
-          card.appendChild(del);
-
-          list.appendChild(card);
-        });
-      }
-
-      buildUI();
-      updateQR();
-      renderSaved();
-    </script>
-  </body>
+buildUI(); updateQR(); renderSaved();
+</script>
+</body>
 </html>
