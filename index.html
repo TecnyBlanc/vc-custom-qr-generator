@@ -21,42 +21,66 @@
         min-height: 100vh;
         display: flex;
         justify-content: center;
-        padding: 16px;
       }
-      .wrap {
+
+      /* Layout & Navigation */
+      .app-container {
         width: 100%;
         max-width: 420px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background: #f5f5f5;
+        position: relative;
       }
+      .view {
+        display: none;
+        padding: 16px;
+        padding-bottom: 70px; /* Space for bottom nav */
+      }
+      .view.active {
+        display: block;
+        animation: fadeIn 0.2s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
       h1 {
         font-size: 24px;
         font-weight: 600;
         text-align: center;
         letter-spacing: 3px;
-        margin: 16px 0 14px;
+        margin: 16px 0 24px;
         color: #111;
       }
+
+      /* --- GENERATOR TAB STYLES --- */
       .qr-box {
         display: flex;
         justify-content: center;
         margin-bottom: 16px;
-
-        #qr-canvas {
-          width: 180px;
-          height: 180px;
-          border-radius: 10px;
-          border: 1px solid #ddd;
-          background: #fff;
-          overflow: hidden; /* Keeps the rounded corners clean */
-        }
-
-        /* Force Android to show the canvas and hide the broken image */
-        #qr-canvas canvas {
-          display: block !important;
-        }
-        #qr-canvas img {
-          display: none !important;
-        }
       }
+      #qr-canvas {
+        width: 180px;
+        height: 180px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        background: #fff;
+        overflow: hidden;
+      }
+      #qr-canvas canvas {
+        display: block !important;
+      }
+      #qr-canvas img {
+        display: none !important;
+      }
+
       .dims {
         display: flex;
         flex-direction: column;
@@ -103,14 +127,7 @@
         background: #111;
         cursor: pointer;
       }
-      input[type="range"]::-moz-range-thumb {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: #111;
-        border: none;
-        cursor: pointer;
-      }
+
       .scale-btns {
         display: flex;
         gap: 4px;
@@ -131,6 +148,7 @@
         color: #fff;
         border-color: #111;
       }
+
       .bottom-row {
         display: flex;
         gap: 8px;
@@ -157,6 +175,7 @@
         color: #2a9d5c;
         transition: opacity 0.3s;
       }
+
       .saved-section {
         margin-top: 4px;
       }
@@ -184,9 +203,6 @@
         gap: 8px;
         cursor: pointer;
       }
-      .saved-card:hover {
-        border-color: #bbb;
-      }
       .dims-text {
         flex: 1;
         font-size: 12px;
@@ -207,33 +223,224 @@
         color: #aaa;
         cursor: pointer;
       }
-      .del-btn:hover {
-        color: #e33;
-        border-color: #e33;
+
+      /* --- LIST QR TAB STYLES --- */
+      .category-block {
+        margin-bottom: 24px;
       }
-      .empty-msg {
+      .category-title {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 4px;
+        font-weight: 600;
+      }
+      .grid-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .list-card {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: transform 0.1s;
+      }
+      .list-card:active {
+        transform: scale(0.97);
+      }
+      .list-card-code {
         font-size: 12px;
-        color: #bbb;
-        padding: 6px 0;
+        font-weight: 600;
+        color: #111;
+        margin-bottom: 8px;
+        text-align: center;
+        word-break: break-all;
+      }
+      .small-qr-container {
+        width: 60px;
+        height: 60px;
+        pointer-events: none;
+      }
+      .small-qr-container canvas {
+        display: block !important;
+        width: 100%;
+        height: 100%;
+      }
+      .small-qr-container img {
+        display: none !important;
+      }
+
+      /* --- MODAL (EXPANDED QR) STYLES --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        backdrop-filter: blur(2px);
+      }
+      .modal-overlay.active {
+        display: flex;
+        animation: fadeIn 0.2s;
+      }
+      .modal-box {
+        background: #fff;
+        padding: 24px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+      }
+      .modal-close {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        border: none;
+        background: none;
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #111;
+        text-align: center;
+      }
+      #modal-qr {
+        width: 200px;
+        height: 200px;
+        margin-bottom: 16px;
+      }
+      #modal-qr canvas {
+        display: block !important;
+        width: 100%;
+        height: 100%;
+      }
+      #modal-qr img {
+        display: none !important;
+      }
+      .modal-desc {
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+        line-height: 1.4;
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 8px;
+        width: 100%;
+      }
+
+      /* --- BOTTOM NAVIGATION --- */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        max-width: 420px;
+        background: #fff;
+        border-top: 1px solid #ddd;
+        display: flex;
+        justify-content: space-around;
+        padding: 12px 0;
+        z-index: 50;
+      }
+      .nav-btn {
+        background: none;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        color: #888;
+        cursor: pointer;
+        padding: 8px 24px;
+        transition: color 0.2s;
+      }
+      .nav-btn.active {
+        color: #111;
+        border-bottom: 2px solid #111;
       }
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <h1>RCUSTOM</h1>
-      <div class="qr-box"><div id="qr-canvas"></div></div>
-      <div class="dims" id="dims-ui"></div>
-      <div class="bottom-row">
-        <button class="save-btn" onclick="saveCard()">💾 Save carton</button>
-        <span id="save-tick">Saved ✓</span>
+    <div class="app-container">
+      <!-- TAB 1: GENERATE (RCUSTOM) -->
+      <div id="view-generate" class="view active">
+        <h1>RCUSTOM</h1>
+        <div class="qr-box"><div id="qr-canvas"></div></div>
+        <div class="dims" id="dims-ui"></div>
+        <div class="bottom-row">
+          <button class="save-btn" onclick="saveCard()">💾 Save carton</button>
+          <span id="save-tick">Saved ✓</span>
+        </div>
+        <div class="saved-section">
+          <div class="saved-title">Saved cartons</div>
+          <div class="saved-list" id="saved-list"></div>
+        </div>
       </div>
-      <div class="saved-section">
-        <div class="saved-title">Saved cartons</div>
-        <div class="saved-list" id="saved-list"></div>
+
+      <!-- TAB 2: LIST QR -->
+      <div id="view-list" class="view">
+        <h1>LIST QR</h1>
+        <div id="list-render-area"></div>
+      </div>
+
+      <!-- BOTTOM NAVIGATION -->
+      <div class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('generate')">
+          Generate
+        </button>
+        <button class="nav-btn" onclick="switchTab('list')">List QR</button>
+      </div>
+
+      <!-- EXPANDED QR MODAL -->
+      <div id="qr-modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+          <button class="modal-close" onclick="closeModal(event)">
+            &times;
+          </button>
+          <div class="modal-title" id="modal-code">P03-24-1-2</div>
+          <div id="modal-qr"></div>
+          <div class="modal-desc" id="modal-desc">Description: Self filled</div>
+        </div>
       </div>
     </div>
 
     <script>
+      /* =========================================
+   ROUTING & TABS
+========================================= */
+      function switchTab(tabId) {
+        // Update views
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => v.classList.remove("active"));
+        document.getElementById("view-" + tabId).classList.add("active");
+
+        // Update buttons
+        document
+          .querySelectorAll(".nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+      }
+
+      /* =========================================
+   APP 1: RCUSTOM GENERATOR LOGIC
+========================================= */
       const STORE_STATE = "rcustom_state";
       const STORE_SAVED = "rcustom_saved";
 
@@ -290,7 +497,6 @@
           );
         } catch (e) {}
       }
-
       function persistSaved() {
         try {
           localStorage.setItem(STORE_SAVED, JSON.stringify(state.saved));
@@ -323,7 +529,6 @@
 
           const row = document.createElement("div");
           row.className = "dim-row";
-
           const lbl = document.createElement("span");
           lbl.className = "dim-label";
           lbl.textContent = d.label;
@@ -341,7 +546,7 @@
           sl.oninput = () => {
             state[d.key] = parseInt(sl.value);
             updateVal(d.key);
-            updateQR();
+            updateGeneratorQR();
             persistState();
           };
           sw.appendChild(sl);
@@ -364,7 +569,7 @@
               state.scales[d.key] = n;
               persistState();
               buildUI();
-              updateQR();
+              updateGeneratorQR();
             };
             btns.appendChild(b);
           });
@@ -378,7 +583,7 @@
         if (el) el.textContent = state[key] + " cm";
       }
 
-      function updateQR() {
+      function updateGeneratorQR() {
         const tab = "\t";
         const payload =
           "RCUSTOM" +
@@ -388,10 +593,8 @@
           (state.W / 100).toFixed(2) +
           tab +
           (state.H / 100).toFixed(2);
-
         const container = document.getElementById("qr-canvas");
-        container.innerHTML = ""; // Clear the previous QR code
-
+        container.innerHTML = "";
         try {
           new QRCode(container, {
             text: payload,
@@ -399,9 +602,7 @@
             height: 180,
             correctLevel: QRCode.CorrectLevel.M,
           });
-        } catch (e) {
-          console.error("QR Generation Failed:", e);
-        }
+        } catch (e) {}
       }
 
       function saveCard() {
@@ -422,13 +623,14 @@
         state.scales.H = Math.floor(entry.H / 10);
         persistState();
         buildUI();
-        updateQR();
+        updateGeneratorQR();
       }
 
       function renderSaved() {
         const list = document.getElementById("saved-list");
         if (!state.saved.length) {
-          list.innerHTML = '<div class="empty-msg">No saved cartons yet.</div>';
+          list.innerHTML =
+            '<div class="empty-msg" style="font-size:12px; color:#bbb; padding:6px 0;">No saved cartons yet.</div>';
           return;
         }
         list.innerHTML = "";
@@ -466,14 +668,185 @@
             renderSaved();
           };
           card.appendChild(del);
-
           list.appendChild(card);
         });
       }
 
+      /* =========================================
+   APP 2: LIST QR & MODAL LOGIC
+========================================= */
+
+      // Define your operational QR codes here
+      const QR_DATABASE = {
+        "Hàng Lỗi": [
+          {
+            code: "PMB2C901",
+            desc: "**Hàng thiếu tem TV**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+          {
+            code: "PMB2C900",
+            desc: "**Hàng Lỗi B2C (Tạm thời)**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+          {
+            code: "PMB2B901",
+            desc: "**Hàng Lỗi B2B (Tạm thời)**\n, WH Code = 901\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+        ],
+        "Trả Cancel": [
+          {
+            code: "PUMB2CPck",
+            desc: "**Trả Cancel B2C**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+          {
+            code: "PUMAOUT",
+            desc: "**Trả Cancel B2B**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+          {
+            code: "PUMB2BPck",
+            desc: "**Trả Cancel B2B**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+        ],
+        "Hàng Thiếu": [
+          {
+            code: "P03-21-1-1",
+            desc: "**Hàng thiếu B2B (Tạm thời)**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+          {
+            code: "P03-21-1-2",
+            desc: "**Hàng thiếu B2C (Tạm thời)**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+        ],
+        Consumables: [
+          {
+            code: "CONSPUM001",
+            desc: "**Hàng Inbound Consumables**\n, \n, Mất ID: KHÔNG\n, Mất UCC: KHÔNG",
+          },
+          {
+            code: "CONSPUM003",
+            desc: "**Trung gian Consumables**\n, \n, Mất ID: KHÔNG\n, Mất UCC: KHÔNG",
+          },
+          {
+            code: "CONSPUM004",
+            desc: "**Loc và ID của hàng xuất Consum**\n, \n, Mất ID: KHÔNG\n, Mất UCC: KHÔNG",
+          },
+        ],
+        "Lab Test - Viện Dệt May": [
+          {
+            code: "PUMAVTRI",
+            desc: "**Viện Dệt May - Xuất hàng xong**\n, WH Code = 999\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+          {
+            code: "PUMAVTRI01",
+            desc: "**Viện Dệt May - Chờ xuất hàng**\n, WH Code = 999\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+        ],
+        "Trung Gian": [
+          {
+            code: "PMVB",
+            desc: "**Trung gian dồn rack**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: KHÔNG",
+          },
+          {
+            code: "PMVM",
+            desc: "**Trung gian chỉnh tồn**\n, WH Code = 001\n, Mất ID: KHÔNG\n, Mất UCC: CÓ",
+          },
+        ],
+      };
+
+      function renderListQR() {
+        const container = document.getElementById("list-render-area");
+        container.innerHTML = "";
+
+        for (const [category, items] of Object.entries(QR_DATABASE)) {
+          // Create category block
+          const catBlock = document.createElement("div");
+          catBlock.className = "category-block";
+
+          // Category title
+          const title = document.createElement("div");
+          title.className = "category-title";
+          title.textContent = `[${category}]`;
+          catBlock.appendChild(title);
+
+          // Cards Grid
+          const grid = document.createElement("div");
+          grid.className = "grid-cards";
+
+          items.forEach((item, index) => {
+            const card = document.createElement("div");
+            card.className = "list-card";
+
+            // Click event to open Modal
+            card.onclick = () => openModal(item.code, item.desc);
+
+            const codeTitle = document.createElement("div");
+            codeTitle.className = "list-card-code";
+            codeTitle.textContent = item.code;
+
+            const qrHolder = document.createElement("div");
+            qrHolder.className = "small-qr-container";
+            // Unique ID for generation
+            const qrId = `qr-small-${category.replace(/\s+/g, "")}-${index}`;
+            qrHolder.id = qrId;
+
+            card.appendChild(codeTitle);
+            card.appendChild(qrHolder);
+            grid.appendChild(card);
+
+            // Generate QR after DOM insertion
+            setTimeout(() => {
+              new QRCode(document.getElementById(qrId), {
+                text: item.code,
+                width: 60,
+                height: 60,
+                correctLevel: QRCode.CorrectLevel.L,
+              });
+            }, 0);
+          });
+
+          catBlock.appendChild(grid);
+          container.appendChild(catBlock);
+        }
+      }
+
+      // Modal Functions
+      function openModal(code, description) {
+        document.getElementById("modal-code").textContent = code;
+        document.getElementById("modal-desc").textContent =
+          `Description: ${description}`;
+
+        const modalQrContainer = document.getElementById("modal-qr");
+        modalQrContainer.innerHTML = ""; // Clear old QR
+
+        // Generate big QR
+        new QRCode(modalQrContainer, {
+          text: code,
+          width: 200,
+          height: 200,
+          correctLevel: QRCode.CorrectLevel.M,
+        });
+
+        document.getElementById("qr-modal").classList.add("active");
+      }
+
+      function closeModal(event) {
+        // Prevent closing if clicking inside the white box
+        if (
+          event.target.classList.contains("modal-box") ||
+          (event.target.closest(".modal-box") &&
+            !event.target.classList.contains("modal-close"))
+        ) {
+          return;
+        }
+        document.getElementById("qr-modal").classList.remove("active");
+      }
+
+      /* =========================================
+   INITIALIZATION
+========================================= */
       buildUI();
-      updateQR();
+      updateGeneratorQR();
       renderSaved();
+      renderListQR(); // Generate the static lists
     </script>
   </body>
 </html>
